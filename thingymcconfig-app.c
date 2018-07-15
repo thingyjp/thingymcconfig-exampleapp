@@ -4,7 +4,7 @@
 
 static void sendappstate(GSocketConnection* socketconnection) {
 	struct thingymcconfig_ctrl_field_index appindex = { .type =
-	THINGYMCCONFIG_FIELDTYPE_APPSTATEUPDATE_APPINDEX, .index = 0 };
+	THINGYMCCONFIG_FIELDTYPE_APPSTATEUPDATE_APPINDEX, .index = 1 };
 	struct thingymcconfig_ctrl_field_stateanderror appstate = { .type =
 	THINGYMCCONFIG_FIELDTYPE_APPSTATEUPDATE_APPSTATE, .state =
 	THINGYMCCONFIG_OK };
@@ -15,7 +15,7 @@ static void sendappstate(GSocketConnection* socketconnection) {
 	GOutputStream* os = g_io_stream_get_output_stream(
 			G_IO_STREAM(socketconnection));
 	g_output_stream_write(os, (void*) &msghdr, sizeof(msghdr), NULL, NULL);
-	g_output_stream_write(os, (void*) &appindex, sizeof(index), NULL, NULL);
+	g_output_stream_write(os, (void*) &appindex, sizeof(appindex), NULL, NULL);
 	g_output_stream_write(os, (void*) &appstate, sizeof(appstate), NULL, NULL);
 	g_output_stream_write(os, (void*) &thingymcconfig_terminator,
 			sizeof(thingymcconfig_terminator), NULL, NULL);
