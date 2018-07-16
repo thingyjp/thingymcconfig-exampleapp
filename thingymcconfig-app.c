@@ -5,6 +5,7 @@
 
 #define APPINDEX 1
 
+static GMainLoop* mainloop;
 static pingobj_t* oping;
 
 static void sendappstate(GSocketConnection* socketconnection) {
@@ -69,7 +70,9 @@ static gboolean ctrlsockcallback(GIOChannel *source, GIOCondition cond,
 
 	for (int f = 0; f < msghdr.numfields; f++) {
 		struct thingymcconfig_ctrl_field field;
-		g_input_stream_read(is, &field, sizeof(field), NULL, NULL);
+		if (g_input_stream_read(is, &field, sizeof(field), NULL, NULL)
+				!= sizeof(field))
+			goto err;
 		g_message("have field; type: %d, v0: %d, v1: %d, v2: %d",
 				(int) field.type, (int) field.v0, (int) field.v1,
 				(int) field.v2);
@@ -88,6 +91,7 @@ static gboolean ctrlsockcallback(GIOChannel *source, GIOCondition cond,
 
 	return TRUE;
 	err: //
+	g_main_loop_quit(mainloop);
 	return FALSE;
 }
 
@@ -139,7 +143,7 @@ int main(int argc, char** argv) {
 
 	sendappstate(socketconnection);
 
-	GMainLoop* mainloop = g_main_loop_new(NULL, FALSE);
+	mainloop = g_main_loop_new(NULL, FALSE);
 
 	g_timeout_add(60 * 1000, checkconnectivity, socketconnection);
 
