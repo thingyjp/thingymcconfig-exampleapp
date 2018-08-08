@@ -4,8 +4,12 @@ src = ['thingymcconfig-app.c']
 
 incs = include_directories(['../thingymcconfig/include/'])
   
-deps = [dependency('glib-2.0'),
+deps = [dependency('libthingymcconfig_client_glib'),
+        dependency('glib-2.0'),
         dependency('gio-unix-2.0'),
         dependency('liboping')]
 
-executable('thingymcconfig-app', src, include_directories : incs, dependencies : deps)
+executable('thingymcconfig-app', src, 
+           include_directories : incs, 
+           dependencies : deps,
+           install : true)
