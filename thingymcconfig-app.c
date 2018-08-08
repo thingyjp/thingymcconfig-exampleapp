@@ -2,8 +2,6 @@
 #include <oping.h>
 #include <thingymcconfig/client_glib.h>
 
-#define APPINDEX 1
-
 static ThingyMcConfigClient* client;
 static GMainLoop* mainloop;
 static pingobj_t* oping;
@@ -44,7 +42,7 @@ int main(int argc, char** argv) {
 
 	g_timeout_add(60 * 1000, checkconnectivity, NULL);
 
-	client = thingymcconfig_client_new();
+	client = thingymcconfig_client_new("example");
 	g_signal_connect(client,
 			THINGYMCCONFIG_CLIENT_SIGNAL_DAEMON "::" THINGYMCCONFIG_CLIENT_DETAIL_DAEMON_CONNECTED,
 			daemonconnectedcb, NULL);
