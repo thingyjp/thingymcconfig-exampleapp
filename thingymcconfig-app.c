@@ -6,6 +6,7 @@ static ThingyMcConfigClient* client;
 static GMainLoop* mainloop;
 static pingobj_t* oping;
 static gboolean reachable = FALSE;
+static guint timeout;
 
 static gboolean checkconnectivity(gpointer user_data) {
 	g_message("checking connectivity");
@@ -24,14 +25,24 @@ static gboolean checkconnectivity(gpointer user_data) {
 	return G_SOURCE_CONTINUE;
 }
 
-static void daemonconnectedcb(void) {
+static void daemon_connected_cb(void) {
 	g_message("daemon connected");
 	thingymcconfig_client_sendappstate(client);
 	thingymcconfig_client_sendconnectivitystate(client, reachable);
 }
 
-static void supplicantdisconnectcb(void) {
+static void daemon_disconnected_cb(void) {
+	g_message("daemon disconnected");
+}
+
+static void supplicant_connected_cb(void) {
+	g_message("supplicant connected");
+	timeout = g_timeout_add(60 * 1000, checkconnectivity, NULL);
+}
+
+static void supplicant_disconnected_cb(void) {
 	g_message("supplicant disconnected");
+	g_source_remove(timeout);
 }
 
 int main(int argc, char** argv) {
@@ -40,15 +51,19 @@ int main(int argc, char** argv) {
 
 	mainloop = g_main_loop_new(NULL, FALSE);
 
-	g_timeout_add(60 * 1000, checkconnectivity, NULL);
-
 	client = thingymcconfig_client_new("example");
 	g_signal_connect(client,
 			THINGYMCCONFIG_CLIENT_SIGNAL_DAEMON "::" THINGYMCCONFIG_CLIENT_DETAIL_DAEMON_CONNECTED,
-			daemonconnectedcb, NULL);
+			daemon_connected_cb, NULL);
+	g_signal_connect(client,
+			THINGYMCCONFIG_CLIENT_SIGNAL_DAEMON "::" THINGYMCCONFIG_CLIENT_DETAIL_DAEMON_DISCONNECTED,
+			daemon_disconnected_cb, NULL);
+	g_signal_connect(client,
+			THINGYMCCONFIG_CLIENT_SIGNAL_NETWORKSTATE "::" THINGYMCCONFIG_CLIENT_DETAIL_NETWORKSTATE_SUPPLICANTCONNECTED,
+			supplicant_connected_cb, NULL);
 	g_signal_connect(client,
 			THINGYMCCONFIG_CLIENT_SIGNAL_NETWORKSTATE "::" THINGYMCCONFIG_CLIENT_DETAIL_NETWORKSTATE_SUPPLICANTDISCONNECTED,
-			supplicantdisconnectcb, NULL);
+			supplicant_disconnected_cb, NULL);
 	thingymcconfig_client_lazyconnect(client);
 
 	g_main_loop_run(mainloop);
