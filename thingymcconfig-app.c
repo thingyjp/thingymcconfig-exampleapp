@@ -52,21 +52,20 @@ int main(int argc, char** argv) {
 	mainloop = g_main_loop_new(NULL, FALSE);
 
 	client = thingymcconfig_client_new("example");
-	g_signal_connect(client,
-			THINGYMCCONFIG_CLIENT_SIGNAL_DAEMON "::" THINGYMCCONFIG_CLIENT_DETAIL_DAEMON_CONNECTED,
+	g_signal_connect(client, THINGYMCCONFIG_DETAILEDSIGNAL_DAEMON_CONNECTED,
 			daemon_connected_cb, NULL);
-	g_signal_connect(client,
-			THINGYMCCONFIG_CLIENT_SIGNAL_DAEMON "::" THINGYMCCONFIG_CLIENT_DETAIL_DAEMON_DISCONNECTED,
+	g_signal_connect(client, THINGYMCCONFIG_DETAILEDSIGNAL_DAEMON_DISCONNECTED,
 			daemon_disconnected_cb, NULL);
-	g_signal_connect(client,
-			THINGYMCCONFIG_CLIENT_SIGNAL_NETWORKSTATE "::" THINGYMCCONFIG_CLIENT_DETAIL_NETWORKSTATE_SUPPLICANTCONNECTED,
+	g_signal_connect(client, THINGYMCCONFIG_DETAILEDSIGNAL_SUPPLICANT_CONNECTED,
 			supplicant_connected_cb, NULL);
 	g_signal_connect(client,
-			THINGYMCCONFIG_CLIENT_SIGNAL_NETWORKSTATE "::" THINGYMCCONFIG_CLIENT_DETAIL_NETWORKSTATE_SUPPLICANTDISCONNECTED,
+			THINGYMCCONFIG_DETAILEDSIGNAL_SUPPLICANT_DISCONNECTED,
 			supplicant_disconnected_cb, NULL);
 	thingymcconfig_client_lazyconnect(client);
 
 	g_main_loop_run(mainloop);
+
+	thingymcconfig_client_free(client);
 
 	return 0;
 }
